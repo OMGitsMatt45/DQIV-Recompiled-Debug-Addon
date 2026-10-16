@@ -1,4 +1,4 @@
-DQIV CHEATS OVERLAY - FOR A REPOSITORY DOWNLOADED AS A ZIP
+DQIV CHEATS OVERLAY
 
 1. Follow instructions on https://github.com/GoldieLeGenie/DQIV-Recompiled
 1. Copy all contents into your DQIV Recompiled folder. This is the folder that
