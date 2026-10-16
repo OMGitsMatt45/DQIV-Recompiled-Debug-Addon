@@ -8,3 +8,12 @@ DQIV CHEATS OVERLAY - FOR A REPOSITORY DOWNLOADED AS A ZIP
 10. Load an adventure and open Misc > Settings. With default controls, Q once
     from the Game page opens Cheats. Q/W or LB/RB turns pages; Z/Space or
     gamepad A confirms. Left/right changes the selected option or item.
+
+    Cheats created:
+    Invincibility
+    Turn off random encounters
+    Exp and Gold multipliers
+    Max gold, bank balance, casino coins, and mini medals
+    Heal/revive party
+    Add items of quantity X
+    Reset cheats
