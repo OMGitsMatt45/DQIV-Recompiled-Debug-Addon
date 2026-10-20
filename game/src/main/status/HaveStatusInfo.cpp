@@ -8,7 +8,7 @@ namespace {
 bool nativeBattleInvincible(const status::HaveStatusInfo& info)
 {
     return pc::gameSettings().cheats.battleInvincible && info.haveStatus_.isPlayer_ &&
-        data_0210bb94.unkfunc_02058114(BATTLE_PART);
+        g_GlobalDQ4.unkfunc_02058114(BATTLE_PART);
 }
 }
 #endif

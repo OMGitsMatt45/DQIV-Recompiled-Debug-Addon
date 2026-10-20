@@ -9,7 +9,7 @@
 namespace pc {
 int lastCheatItemId() {
     // Entry zero is empty; the compiled item table defines the valid range.
-    return static_cast<int>(sizeof(data_020978d8.data) / sizeof(data_020978d8.data[0])) - 1;
+    return static_cast<int>(sizeof(itemDataTable.data) / sizeof(itemDataTable.data[0])) - 1;
 }
 
 void cheatItemName(char* text, int size, int itemId) {

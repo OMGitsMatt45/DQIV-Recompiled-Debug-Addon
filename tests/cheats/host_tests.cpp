@@ -108,17 +108,17 @@ int main(int argc, char** argv) {
     // Actual game methods, extracted unchanged from their translation units.
     auto& info = party.players[1].haveStatusInfo_;
     settings.cheats.battleInvincible = true;
-    data_0210bb94.part = BATTLE_PART;
+    g_GlobalDQ4.part = BATTLE_PART;
     info.setHp(0); info.addBaseHp(-50); info.setMp(0); info.addMp(-20);
     CHECK(info.getHp() == 100 && info.haveStatus_.mp == 50);
     info.haveStatus_.isPlayer_ = false;
     info.setHp(70); info.addBaseHp(-10); info.setMp(40); info.addMp(-5);
     CHECK(info.getHp() == 60 && info.haveStatus_.mp == 35);
     info.haveStatus_.isPlayer_ = true;
-    data_0210bb94.part = 12;
+    g_GlobalDQ4.part = 12;
     info.setHp(50); info.addMp(-5);
     CHECK(info.getHp() == 50 && info.haveStatus_.mp == 30);
-    data_0210bb94.part = BATTLE_PART;
+    g_GlobalDQ4.part = BATTLE_PART;
     settings.cheats.battleInvincible = false;
     info.addBaseHp(-10); info.setMp(10);
     CHECK(info.getHp() == 40 && info.haveStatus_.mp == 10);

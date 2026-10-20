@@ -97,7 +97,7 @@ struct GlobalDQ4 {
     int part = 12;
     int unkfunc_02058114(int value) {return part == value;}
 };
-inline GlobalDQ4 data_0210bb94;
+inline GlobalDQ4 g_GlobalDQ4;
 struct TestStage {int mapUpdates = 0; void updateBattleMap() {++mapUpdates;}} inline g_Stage;
 struct TestGlobal {int battles = 0; void startBattle() {++battles;}} inline g_Global;
 namespace encount {
@@ -115,7 +115,7 @@ namespace param {
 template<class T, int N> struct ExcelFile {unsigned id; T data[N];};
 struct ItemData {};
 }
-inline const param::ExcelFile<param::ItemData, 162> data_020978d8{};
+inline const param::ExcelFile<param::ItemData, 162> itemDataTable{};
 struct TextAPI {
     static void setLanguage(int) {}
     static void extractText(char* text, int size, int, int id) {
@@ -131,9 +131,9 @@ struct MenuItem {
     void drawActive() {}
 };
 }
-struct UnkMenuParts {int type_, slot_, tag_, a_, b_, c_, w_, h_; int x_ = 0, y_ = 0;};
+struct MenuPartsEntry {int type_, slot_, tag_, a_, b_, c_, w_, h_; int x_ = 0, y_ = 0;};
 inline int drawnTabs = 0, drawnText = 0, highestRow = 0;
-inline void unkfunc_02050ee0(UnkMenuParts* parts, int*, int, int, int) {
+inline void drawMenuParts(MenuPartsEntry* parts, int*, int, int, int) {
     ++drawnText;
     highestRow = std::max(highestRow, parts[0].y_);
 }

@@ -1,8 +1,8 @@
 #ifdef DQIV_NATIVE
 #include "ov016/MenuSettings/SettingsPanel.hpp"
 #include "ov016/MenuTemplate/MenuTemplate_materiel.hpp"
-#include "ov016/UnkMaterielMenuDraw/UnkMaterielMenuDraw_0216ce4c.hpp"
-#include "main/menu/UnkMenuPartsDraw.hpp"
+#include "ov016/UnkMaterielMenuDraw/MaterielMenuDraw.hpp"
+#include "main/menu/MenuPartsDraw.hpp"
 #include "main/status/GameStatus.hpp"
 #include "main/status/OptionStatus.hpp"
 #include "main/text/TextAPI.hpp"
@@ -17,20 +17,20 @@ namespace {
 // program's memory.
 char s_label[16][48];
 char s_value[16][40];
-UnkMenuParts s_left[] = {
+MenuPartsEntry s_left[] = {
     { 0x0d, 0x08, (short)0xf000, 0, 0, 0, 0xd0, 0xe },
     { 0xff, 0x00, 0, 0, 0, 0, 0, 0 },
 };
-UnkMenuParts s_right[] = {
+MenuPartsEntry s_right[] = {
     { 0x0d, 0x0a, (short)0xf000, 0, 0, 0, 0xd0, 0xe },
     { 0xff, 0x00, 0, 0, 0, 0, 0, 0 },
 };
-void text(UnkMenuParts* parts, char* line, int x, int y)
+void text(MenuPartsEntry* parts, char* line, int x, int y)
 {
     int param = (int)line;
     parts[0].x_ = x;
     parts[0].y_ = y;
-    unkfunc_02050ee0(parts, &param, 0, 0, 1);
+    drawMenuParts(parts, &param, 0, 0, 1);
 }
 void copy(char* destination, int size, const char* source)
 {

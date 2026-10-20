@@ -3,10 +3,13 @@
 
 The game methods under test are extracted unchanged from production sources.
 This exercises logic and menu dispatch, not the Windows ABI or actual graphics.
-Requires Python 3 and a C++20 g++ (Linux or WSL).
+Requires Python 3 and a C++20 g++ (Linux or WSL). Pass --game-root pointing
+at an unmodified upstream 1.4 checkout to also check the production headers.
 """
 from pathlib import Path
+import argparse
 import os
+import re
 import subprocess
 import tempfile
 
@@ -26,16 +29,62 @@ def function(path, marker):
     return text[start:end]
 
 
+def check_build_sources():
+    cmake = (ROOT / "CMakeLists.txt").read_text()
+    executable = re.search(r"add_executable\s*\(\s*DragonQuestIV\b([^)]*)\)", cmake)
+    if not executable or "native/Cheats.cpp" not in executable.group(1).split():
+        raise RuntimeError("CMakeLists.txt must compile native/Cheats.cpp into DragonQuestIV")
+    print("Cheats.cpp is registered in the DragonQuestIV executable.", flush=True)
+
+
+def check_production_sources(game_root):
+    """Use actual game declarations, without the host renderer/game fixtures."""
+    includes = [
+        ROOT / "native", ROOT / "game/include", game_root / "native",
+        game_root / "native/compat", game_root / "game/include",
+        game_root / "game/libs/NitroSDK/include",
+        game_root / "game/libs/NitroSystem/include",
+    ]
+    required = [
+        "native/SaveStore.hpp", "game/include/main/global/GlobalDQ4.hpp",
+        "game/include/main/menu/MenuPartsDraw.hpp",
+        "game/include/ov016/UnkMaterielMenuDraw/MaterielMenuDraw.hpp",
+    ]
+    for path in required:
+        if not (game_root / path).is_file():
+            raise RuntimeError(f"Missing upstream 1.4 file: {game_root / path}")
+    sources = [
+        "native/Cheats.cpp", "native/Settings.cpp",
+        "game/src/main/status/HaveStatusInfo.cpp",
+        "game/src/main/status/BasePartyStatus.cpp",
+        "game/src/main/encount/Encount.cpp",
+        "game/src/ov016/MenuSettings/SettingsPanel.cpp",
+    ]
+    command = [os.environ.get("CXX", "g++"), "-std=c++20", "-DDQIV_NATIVE=1",
+               "-fpermissive", "-fsyntax-only"]
+    command += [f"-I{path}" for path in includes]
+    command += [str(ROOT / path) for path in sources]
+    subprocess.run(command, check=True, timeout=60)
+    print("6 production sources pass with upstream game headers (no host fixtures).", flush=True)
+
+
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--game-root", type=Path,
+                        help="Full upstream 1.4 source tree for production-header checks")
+    args = parser.parse_args()
+    check_build_sources()
+    if args.game_root:
+        check_production_sources(args.game_root.resolve())
     wrappers = [
         "main/menu/MenuBase.hpp",
         "ov016/MenuTemplate/MenuTemplate_materiel.hpp",
-        "ov016/UnkMaterielMenuDraw/UnkMaterielMenuDraw_0216ce4c.hpp",
-        "main/menu/UnkMenuPartsDraw.hpp",
+        "ov016/UnkMaterielMenuDraw/MaterielMenuDraw.hpp",
+        "main/menu/MenuPartsDraw.hpp",
         "main/status/GameStatus.hpp", "main/status/OptionStatus.hpp",
         "main/status/PartyStatus.hpp", "main/status/PlayerStatus.hpp",
         "main/param/Param.hpp", "main/text/TextAPI.hpp", "main/dss/Pad.hpp",
-        "nitro/pad.h",
+        "nitro/pad.h", "SaveStore.hpp",
     ]
     methods = [
         ("game/src/main/status/HaveStatusInfo.cpp", "bool nativeBattleInvincible("),

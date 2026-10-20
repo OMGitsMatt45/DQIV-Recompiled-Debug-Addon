@@ -1,6 +1,6 @@
 # Native Cheats page: build and play checks
 
-The prototype adds an in-game page at **Misc > Settings > Cheats**. L/R turns
+The overlay adds an in-game page at **Misc > Settings > Cheats**. L/R turns
 pages (Q/W on the default keyboard, LB/RB on a gamepad). Left/right changes a
 toggle, multiplier, selected item or quantity. A/confirm runs a one-shot action.
 
@@ -10,7 +10,11 @@ Use the repository's existing Windows build: Visual Studio 2022 with Desktop
 development with C++, a European YIVP ROM in `ROMandOBBfileHere`, and
 `build.bat`. The optional Android OBB supplies HD sound. The build stays Win32.
 
-The patch's base is commit `e1826f957f72eb052c08e0422796c19fced72d80`.
+The patch targets upstream **1.4**, commit
+`793a40ea08a703ae36d41bba263782d541ae2bdb`. Apply it to that release's full
+source tree, including the overlay's `CMakeLists.txt`, which compiles
+`native/Cheats.cpp` into the executable. Do not apply this version to an older
+fork or assume compatibility with a later upstream release.
 Use a copied save for the first play check, since the one-shot actions change
 the adventure when it is subsequently saved.
 
@@ -20,6 +24,21 @@ Run `python3 tests/cheats/run_host_tests.py` on Linux or WSL with Python 3 and a
 C++20 `g++`. The harness compiles the actual native settings, cheat actions and
 Settings panel. It extracts selected game methods unchanged from production
 sources and supplies small game-state and renderer boundaries.
+
+The host suite runs directly from this partial add-on repository; no game tree
+or ROM is needed. It checks that the packaged CMake executable includes
+`Cheats.cpp`. For a production-header check, also run:
+
+```sh
+python3 tests/cheats/run_host_tests.py --game-root /path/to/DQIV-Recompiled-1.4
+```
+
+This checks all six modified C++ translation units against the real upstream
+1.4 headers, without the game/renderer fixtures. The upstream tree is read only
+and need not have the overlay installed. It catches renamed game symbols and
+missing menu headers that the focused fixtures cannot detect. The Linux syntax
+check uses `-fpermissive` for the game's existing 32-bit pointer-to-int casts;
+it does not validate the Win32 ABI or execute a Windows linker.
 
 The checks cover configuration defaults and round trips, multiplier limits and
 overflow, invalid/full/partly full inventory cases, recovery and party-view
