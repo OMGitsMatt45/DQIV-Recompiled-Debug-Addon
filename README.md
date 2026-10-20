@@ -9,9 +9,7 @@ Cheat switches default to off and multipliers to x1.
 
 Use [GoldieLeGenie/DQIV-Recompiled release 1.4](https://github.com/GoldieLeGenie/DQIV-Recompiled/tree/1.4),
 commit `793a40ea08a703ae36d41bba263782d541ae2bdb`.
-This overlay uses the 1.4 game symbols and menu headers. Earlier releases,
-including the original personal fork at `e1826f9`, need the previous overlay.
-Future upstream releases need a compatibility check before applying this one.
+This overlay uses the 1.4 game symbols and menu headers.
 
 ## Install and build on Windows
 
@@ -27,7 +25,7 @@ Future upstream releases need a compatibility check before applying this one.
    `add_executable(DragonQuestIV ...)` entry in `CMakeLists.txt` includes
    `native/Cheats.cpp`. The build file is part of the overlay; copying just
    `game` and `native` leaves unresolved cheat symbols at link time.
-5. Install Visual Studio 2022 with **Desktop development with C++**, the Windows
+5. Install Visual Studio 2026 with **Desktop development with C++**, the Windows
    SDK, and C++ CMake tools. The game uses the existing **Win32** build.
 6. Put your European **YIVP** Nintendo DS ROM (`.nds`, or a ZIP containing it)
    in `ROMandOBBfileHere`. The Android OBB is optional for HD audio.
@@ -45,23 +43,3 @@ once from the Game page opens Cheats. Q/W or LB/RB turns pages; Z/Space or
 gamepad A confirms. Left/right changes an option, selected item, or quantity.
 Money, items, and recovery persist when the adventure is saved normally;
 resetting cheats does not undo them. Use a copied save for initial play checks.
-
-## Checks for development
-
-With Python 3 and a C++20 `g++` on Linux or WSL, run the ROM-free host suite:
-
-```sh
-python3 tests/cheats/run_host_tests.py
-```
-
-To also check all six modified C++ sources against the **actual 1.4 headers**,
-pass a full upstream 1.4 source tree (it can be an unmodified extracted ZIP):
-
-```sh
-python3 tests/cheats/run_host_tests.py --game-root /path/to/DQIV-Recompiled-1.4
-```
-
-The runner also checks that the packaged CMake file registers `Cheats.cpp`.
-Host tests keep AddressSanitizer and UndefinedBehaviorSanitizer enabled. These
-checks do not replace an MSVC Win32 build or play testing; see
-[docs/cheats-testing.md](docs/cheats-testing.md).
