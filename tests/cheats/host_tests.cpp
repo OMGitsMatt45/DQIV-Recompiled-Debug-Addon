@@ -29,6 +29,7 @@ int main(int argc, char** argv) {
     auto& settings = pc::gameSettings();
     CHECK(!settings.cheats.battleInvincible && !settings.cheats.noRandomEncounters);
     CHECK(settings.cheats.expMultiplier == 1 && settings.cheats.goldMultiplier == 1);
+    CHECK(settings.centredCamera);
     for (int multiplier : pc::cheatMultipliers) {
         CHECK(pc::normalizeCheatMultiplier(multiplier) == multiplier);
         CHECK(pc::scaleCheatReward(25, multiplier, 0xffffff) == 25 * multiplier);
@@ -46,6 +47,7 @@ int main(int argc, char** argv) {
     pc::loadSettings();
     settings.cheats = {true, true, 32, 8};
     settings.volume = 30;
+    settings.centredCamera = false;
     settings.keys[0] = 'v';
     pc::saveSettings();
     settings = pc::GameSettings{};
@@ -53,6 +55,7 @@ int main(int argc, char** argv) {
     CHECK(settings.cheats.battleInvincible && settings.cheats.noRandomEncounters);
     CHECK(settings.cheats.expMultiplier == 32 && settings.cheats.goldMultiplier == 8);
     CHECK(settings.volume == 30 && settings.keys[0] == 'v');
+    CHECK(!settings.centredCamera);
     {
         std::ofstream file(pc::testSaveDirectory / "settings.ini");
         file << "volume=70\ncheatExpMultiplier=-1\ncheatGoldMultiplier=2147483647\ncheatBattleInvincible=garbage\n";
@@ -61,7 +64,18 @@ int main(int argc, char** argv) {
     pc::loadSettings();
     CHECK(settings.cheats.expMultiplier == 1 && settings.cheats.goldMultiplier == 64);
     CHECK(!settings.cheats.battleInvincible && settings.volume == 70);
+    CHECK(settings.centredCamera); // Older settings files keep upstream's new default.
     settings.cheats = pc::CheatSettings{};
+
+    // Upstream 1.5's menu quit request survives alongside the cheat settings.
+    CHECK(!pc::takeQuitRequest());
+    pc::requestQuit();
+    CHECK(pc::takeQuitRequest());
+    CHECK(!pc::takeQuitRequest());
+    CHECK(std::string(pc::quitLabel(0)) == "ゲームを おわる");
+    CHECK(std::string(pc::quitLabel(1)) == "Quit game");
+    for (int language = 2; language <= 5; ++language)
+        CHECK(std::string(pc::quitLabel(language)) != "Quit game");
 
     auto& party = status::g_Party;
     CHECK(pc::lastCheatItemId() == 161);
@@ -167,6 +181,27 @@ int main(int argc, char** argv) {
     CHECK(panel.page_ == pc::pageGame);
     panel.draw(item, 0, 256, frame);
     CHECK(drawnTabs == 4);
+    input(panel, item, PAD_BUTTON_R);
+    CHECK(panel.page_ == pc::pageDisplay);
+    panel.execute(item);
+    item.active_ = rowIndex(panel, pc::settingCentredCamera);
+    input(panel, item, PAD_KEY_LEFT);
+    CHECK(!settings.centredCamera && pc::takeSettingsApply());
+    input(panel, item, 0, 2);
+    CHECK(settings.centredCamera && pc::takeSettingsApply());
+    for (int language = 0; language <= 5; ++language) {
+        settings.language = language;
+        CHECK(std::string(pc::settingLabel(pc::settingCentredCamera, language)).size() > 0);
+        CHECK(std::string(pc::settingHint(pc::settingCentredCamera, language)).size() > 0);
+        const auto enabled = pc::settingValue(pc::settingCentredCamera, language);
+        input(panel, item, PAD_KEY_RIGHT);
+        CHECK(pc::settingValue(pc::settingCentredCamera, language) != enabled);
+        input(panel, item, PAD_KEY_RIGHT);
+        CHECK(settings.centredCamera && pc::settingValue(pc::settingCentredCamera, language) == enabled);
+        CHECK(pc::takeSettingsApply());
+        panel.draw(item, 0, 256, frame);
+        CHECK(drawnTabs == 4 && highestRow <= 176);
+    }
     panel.open(true);
     input(panel, item, PAD_BUTTON_L);
     CHECK(panel.page_ == pc::pageCheats && panel.rowCount_ == 14);

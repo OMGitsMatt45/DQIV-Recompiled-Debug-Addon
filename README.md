@@ -1,4 +1,4 @@
-# DQIV Cheats Overlay — upstream 1.4
+# DQIV Cheats Overlay — upstream 1.5
 
 Adds a **Cheats** page to **Misc > Settings** while an adventure is loaded.
 It provides battle invincibility, no random encounters, EXP/gold multipliers,
@@ -7,13 +7,14 @@ Cheat switches default to off and multipliers to x1.
 
 ## Supported game version
 
-Use [GoldieLeGenie/DQIV-Recompiled release 1.4](https://github.com/GoldieLeGenie/DQIV-Recompiled/tree/1.4),
-commit `793a40ea08a703ae36d41bba263782d541ae2bdb`.
-This overlay uses the 1.4 game symbols and menu headers.
+Use [GoldieLeGenie/DQIV-Recompiled release 1.5](https://github.com/GoldieLeGenie/DQIV-Recompiled/tree/1.5),
+commit `d33f26238e2f1ede995ca55cebccbf7ec8af15fe`.
+This overlay retains 1.5's achievements, centred-camera setting, and quit-menu
+support alongside the cheats.
 
 ## Install and build on Windows
 
-1. Download and extract the [upstream 1.4 source ZIP](https://github.com/GoldieLeGenie/DQIV-Recompiled/archive/refs/tags/1.4.zip)
+1. Download and extract the [upstream 1.5 source ZIP](https://github.com/GoldieLeGenie/DQIV-Recompiled/archive/refs/tags/1.5.zip)
    into a fresh folder. It must contain `build.bat`, `build.ps1`, `CMakeLists.txt`,
    `game`, and `native`.
 2. Extract the cheats overlay. If it has a `Copy_into_repository` folder, open
@@ -33,7 +34,7 @@ This overlay uses the 1.4 game symbols and menu headers.
    start that executable. No ROM, assets, or compiled game is included here.
 
 For an existing installation, keep its `dist\saves` folder backed up. Use a
-fresh 1.4 source folder when changing game versions rather than mixing old and
+fresh 1.5 source folder when changing game versions rather than mixing old and
 new source files. Copying this overlay alone does not upgrade an older game.
 
 ## Use

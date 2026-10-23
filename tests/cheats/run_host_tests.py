@@ -4,7 +4,7 @@
 The game methods under test are extracted unchanged from production sources.
 This exercises logic and menu dispatch, not the Windows ABI or actual graphics.
 Requires Python 3 and a C++20 g++ (Linux or WSL). Pass --game-root pointing
-at an unmodified upstream 1.4 checkout to also check the production headers.
+at an unmodified upstream 1.5 checkout to also check the production headers.
 """
 from pathlib import Path
 import argparse
@@ -34,7 +34,11 @@ def check_build_sources():
     executable = re.search(r"add_executable\s*\(\s*DragonQuestIV\b([^)]*)\)", cmake)
     if not executable or "native/Cheats.cpp" not in executable.group(1).split():
         raise RuntimeError("CMakeLists.txt must compile native/Cheats.cpp into DragonQuestIV")
-    print("Cheats.cpp is registered in the DragonQuestIV executable.", flush=True)
+    core = re.search(r"add_library\s*\(\s*dqiv_core\s+STATIC\b([^)]*)\)", cmake)
+    for source in ("native/Achievements.cpp", "native/AchievementTexts.cpp"):
+        if not core or source not in core.group(1).split():
+            raise RuntimeError(f"CMakeLists.txt must retain upstream 1.5 source {source}")
+    print("Cheats.cpp and the upstream achievement sources are registered.", flush=True)
 
 
 def check_production_sources(game_root):
@@ -49,10 +53,11 @@ def check_production_sources(game_root):
         "native/SaveStore.hpp", "game/include/main/global/GlobalDQ4.hpp",
         "game/include/main/menu/MenuPartsDraw.hpp",
         "game/include/ov016/UnkMaterielMenuDraw/MaterielMenuDraw.hpp",
+        "native/Achievements.hpp",
     ]
     for path in required:
         if not (game_root / path).is_file():
-            raise RuntimeError(f"Missing upstream 1.4 file: {game_root / path}")
+            raise RuntimeError(f"Missing upstream 1.5 file: {game_root / path}")
     sources = [
         "native/Cheats.cpp", "native/Settings.cpp",
         "game/src/main/status/HaveStatusInfo.cpp",
@@ -60,18 +65,28 @@ def check_production_sources(game_root):
         "game/src/main/encount/Encount.cpp",
         "game/src/ov016/MenuSettings/SettingsPanel.cpp",
     ]
+    # Check upstream callers too: checking only the overlay misses new fields
+    # and functions that the overlay's older settings files could erase.
+    callers = [
+        "game/src/ov000/town/TownCamera.cpp",
+        "game/src/ov016/MaterielMenu_LOAD/MaterielMenu_LOAD.cpp",
+        "game/src/ov016/TownMenu_OPERATION/TownMenu_OPERATION_ROOT.cpp",
+        "game/src/ov016/MenuAchievements/AchievementsPanel.cpp",
+    ]
     command = [os.environ.get("CXX", "g++"), "-std=c++20", "-DDQIV_NATIVE=1",
                "-fpermissive", "-fsyntax-only"]
     command += [f"-I{path}" for path in includes]
     command += [str(ROOT / path) for path in sources]
+    command += [str(game_root / path) for path in callers]
     subprocess.run(command, check=True, timeout=60)
-    print("6 production sources pass with upstream game headers (no host fixtures).", flush=True)
+    print(f"{len(sources)} overlay sources and {len(callers)} upstream callers pass "
+          "with upstream game headers (no host fixtures).", flush=True)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--game-root", type=Path,
-                        help="Full upstream 1.4 source tree for production-header checks")
+                        help="Full upstream 1.5 source tree for production-header checks")
     args = parser.parse_args()
     check_build_sources()
     if args.game_root:

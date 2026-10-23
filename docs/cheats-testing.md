@@ -6,14 +6,15 @@ toggle, multiplier, selected item or quantity. A/confirm runs a one-shot action.
 
 ## Build
 
-Use the repository's existing Windows build: Visual Studio 2022 with Desktop
+Use the repository's existing Windows build: Visual Studio 2026 with Desktop
 development with C++, a European YIVP ROM in `ROMandOBBfileHere`, and
 `build.bat`. The optional Android OBB supplies HD sound. The build stays Win32.
 
-The patch targets upstream **1.4**, commit
-`793a40ea08a703ae36d41bba263782d541ae2bdb`. Apply it to that release's full
+The patch targets upstream **1.5**, commit
+`d33f26238e2f1ede995ca55cebccbf7ec8af15fe`. Apply it to that release's full
 source tree, including the overlay's `CMakeLists.txt`, which compiles
-`native/Cheats.cpp` into the executable. Do not apply this version to an older
+`native/Cheats.cpp` into the executable and retains the upstream achievement
+sources in `dqiv_core`. Do not apply this version to an older
 fork or assume compatibility with a later upstream release.
 Use a copied save for the first play check, since the one-shot actions change
 the adventure when it is subsequently saved.
@@ -27,15 +28,17 @@ sources and supplies small game-state and renderer boundaries.
 
 The host suite runs directly from this partial add-on repository; no game tree
 or ROM is needed. It checks that the packaged CMake executable includes
-`Cheats.cpp`. For a production-header check, also run:
+`Cheats.cpp` and retains both upstream achievement sources. For a
+production-header check, also run:
 
 ```sh
-python3 tests/cheats/run_host_tests.py --game-root /path/to/DQIV-Recompiled-1.4
+python3 tests/cheats/run_host_tests.py --game-root /path/to/DQIV-Recompiled-1.5
 ```
 
-This checks all six modified C++ translation units against the real upstream
-1.4 headers, without the game/renderer fixtures. The upstream tree is read only
-and need not have the overlay installed. It catches renamed game symbols and
+This checks all six overlay C++ translation units and four upstream callers
+(town camera, load menu, operation menu, and achievements panel) against the
+real upstream 1.5 headers, without the game/renderer fixtures. The upstream tree
+is read only and need not have the overlay installed. It catches renamed game symbols and
 missing menu headers that the focused fixtures cannot detect. The Linux syntax
 check uses `-fpermissive` for the game's existing 32-bit pointer-to-int casts;
 it does not validate the Win32 ABI or execute a Windows linker.
@@ -45,7 +48,10 @@ overflow, invalid/full/partly full inventory cases, recovery and party-view
 restoration, battle-only HP/MP protection, pending encounters and scripted
 battles, reward eligibility and the existing double-reward effect, menu
 navigation, action dispatch, item/quantity limits, six language paths, and
-keyboard rebinding. Address and undefined-behavior sanitizers stay enabled;
+keyboard rebinding. The 1.5 checks also cover centred-camera defaults,
+persistence, display-menu toggling and layout in six languages, and the
+menu-quit request and labels. Address and undefined-behavior sanitizers stay
+enabled;
 leak detection is disabled because some sandboxes deny its /proc access.
 
 These checks do not validate the MSVC Win32 ABI, assets, actual font metrics,
@@ -86,6 +92,10 @@ audio, complete battles, or loading/saving the cartridge image.
    Verify adventure changes and settings persistence. Reset cheats and
    verify both switches and both multipliers return to defaults while already
    awarded money/items remain.
+10. Check the 1.5 features alongside Cheats: toggle **Display > Centred camera**
+    in a town or dungeon and verify the framing changes and persists after
+    restarting. Open Achievements and check its list and icons. Use the menu's
+    **Quit game** entry and verify the game closes normally.
 
 ## Scope
 
